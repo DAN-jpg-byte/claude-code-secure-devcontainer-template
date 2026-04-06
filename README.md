@@ -278,3 +278,6 @@ Claude Code は親ディレクトリを遡って CLAUDE.md を探すので、共
 - [Anthropic 公式 DevContainer リファレンス](https://github.com/anthropics/claude-code/tree/main/.devcontainer)
 - [Claude Code DevContainer ドキュメント](https://docs.anthropic.com/en/docs/claude-code/devcontainer)
 - [API キーのベストプラクティス（Anthropic公式）](https://support.claude.com/en/articles/9767949-api-key-best-practices-keeping-your-keys-safe-and-secure)
+- [🐳 DevContainer実践編：settings.json レビュー、devcontainer.json 統合、Docker イメージの仕組み](https://www.notion.so/DevContainer-settings-json-devcontainer-json-Docker-33a6f8be0227813ab7e3c4c40d5844ff?source=copy_link)
+- [【セキュリティ対策】🐳 Claude Code × DevContainer：.env管理 & 数百プロジェクト運用のベストプラクティス](https://www.notion.so/Claude-Code-DevContainer-env-33a6f8be022781d2b4e8f3d0c2955187?source=copy_link)
+- [🔐 Claude Code（AI）をDockerコンテナの中で動かす際に機密情報管理の問題点と対策：完全ガイド](https://www.notion.so/Claude-Code-AI-Docker-3366f8be02278199b89fe319e50928fc?source=copy_link)
