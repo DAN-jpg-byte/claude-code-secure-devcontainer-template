@@ -1,0 +1,33 @@
+# 環境変数ファイル
+.env
+
+# Cookieファイル（機密情報）
+*.pkl
+
+# ログファイル
+*.log
+
+# Pythonキャッシュ
+__pycache__/
+*.pyc
+*.pyo
+
+# キャプチャ画像（一時ファイル）
+captcha.jpg
+error.png
+
+# IDE設定ファイル
+.vscode/
+.idea/
+
+# OS生成ファイル
+.DS_Store
+Thumbs.db
+
+# テストファイル
+*_test.py
+test_*
+
+# 一時ファイル
+*.tmp
+*.temp

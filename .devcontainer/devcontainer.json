@@ -1,0 +1,48 @@
+{
+  "name": "Claude Code Secure Sandbox",
+
+  "build": {
+    "dockerfile": "Dockerfile"
+  },
+
+  // ワークスペースのマウント
+  "workspaceMount": "source=${localWorkspaceFolder},target=/workspace,type=bind,consistency=cached",
+  "workspaceFolder": "/workspace",
+
+  // ① .env を環境変数として注入（ファイル自体はコンテナ内に存在しない）
+  "runArgs": [
+    "--env-file", "C:/Users/user/projects/confidential/.env"
+  ],
+
+  // ② Claude Code の認証情報を永続化
+  //    Windows側の C:\Users\user\.claude をコンテナ内にマウントする
+  "mounts": [
+    "source=C:/Users/user/.claude,target=/home/node/.claude,type=bind,consistency=cached"
+  ],
+
+  // ③ Claude Code に設定ディレクトリの場所を教える
+  "containerEnv": {
+    "CLAUDE_CONFIG_DIR": "/home/node/.claude"
+  },
+
+  // VS Code 拡張機能
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-python.python",
+        "ms-azuretools.vscode-docker"
+      ]
+    }
+  },
+
+  // ユーザーは "node"（Dockerfile のベースイメージに合わせる）
+  "remoteUser": "node",
+
+
+  // コンテナ起動後に毎回実行されるコマンドです。
+  // ここでファイアウォール初期化スクリプトを動かし、外向き通信ルールを適用します。
+  "postStartCommand": "bash .devcontainer/init-firewall.sh"
+
+
+
+}
