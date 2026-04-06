@@ -5,6 +5,14 @@
     "dockerfile": "Dockerfile"
   },
 
+  // ★追加部分①：Python環境をコンテナに自動で組み込む
+  "features": {
+    "ghcr.io/devcontainers/features/python:1": {
+      "installTools": true,
+      "version": "latest"
+    }
+  },
+
   // ワークスペースのマウント
   "workspaceMount": "source=${localWorkspaceFolder},target=/workspace,type=bind,consistency=cached",
   "workspaceFolder": "/workspace",
@@ -39,11 +47,10 @@
   // ユーザーは "node"（Dockerfile のベースイメージに合わせる）
   "remoteUser": "node",
 
+  // ★追加部分②：コンテナ作成直後に requirements.txt のライブラリをインストール
+  "postCreateCommand": "pip install -r requirements.txt",
 
   // コンテナ起動後に毎回実行されるコマンドです。
   // ここでファイアウォール初期化スクリプトを動かし、外向き通信ルールを適用します。
   "postStartCommand": "bash .devcontainer/init-firewall.sh"
-
-
-
 }
