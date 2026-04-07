@@ -1,0 +1,11 @@
+{
+  // このワークスペースを VS Code / Cursor で開いたときに、
+  // 「再生ボタン」や補完が毎回同じ Python（仮想環境 .venv）を使うように固定します。
+  //
+  // Dev Container 側（.devcontainer/devcontainer.json）にも同等設定がありますが、
+  // 拡張機能の初期化順やキャッシュ等で外れるケースの保険として、ワークスペース側にも明示します。
+  "python.defaultInterpreterPath": "/workspace/.venv/bin/python",
+
+  // 統合ターミナル起動時に仮想環境を自動でアクティベートします  。
+  "python.terminal.activateEnvironment": true
+}

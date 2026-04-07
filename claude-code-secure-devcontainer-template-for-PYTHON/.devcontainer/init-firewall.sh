@@ -9,17 +9,18 @@ echo "🛡️ ファイアウォールを設定しています..."
 
 # 2. デフォルトで「外向きの通信はすべて拒否」にする
 #    許可ルールを書いたものだけが通ります。
-sudo ufw default deny outgoing
+# -n: 非対話。sudo 未設定なら即失敗（postStart でハングしない）
+sudo -n ufw default deny outgoing
 
 # 3. DNS（名前解決）を許可 — ドメイン名を IP アドレスに変えるのに必要（ポート 53）
-sudo ufw allow out to any port 53
+sudo -n ufw allow out to any port 53
 
 # 4. HTTPS を許可 — 多くの Web/API が使う暗号化通信の標準（ポート 443）
-sudo ufw allow out to any port 443
+sudo -n ufw allow out to any port 443
 
 # 5. 上記のルールを有効化
 #    --force は「本当に有効にしますか？」の対話確認を省略するためのオプションです。
-sudo ufw --force enable
+sudo -n ufw --force enable
 
 # 6. 完了メッセージ
 echo "✅ 設定完了"
