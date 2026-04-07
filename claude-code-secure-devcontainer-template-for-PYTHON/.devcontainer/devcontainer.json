@@ -9,7 +9,7 @@
   "features": {
     "ghcr.io/devcontainers/features/python:1": {
       "installTools": true,
-      "version": "latest"
+      "version": "os-provided"  
     }
   },
 
@@ -40,15 +40,23 @@
         "ms-python.python",
         "ms-azuretools.vscode-docker",
         "Anthropic.claude-code"        
-      ]
+      ],
+      "settings": {
+        "python.defaultInterpreterPath": "/workspace/.venv/bin/python",
+        "python.terminal.activateEnvironment": true
+      }
     }
   },
 
   // ユーザーは "node"（Dockerfile のベースイメージに合わせる）
   "remoteUser": "node",
+  "remoteEnv": {
+    "VIRTUAL_ENV": "/workspace/.venv",
+    "PATH": "/workspace/.venv/bin:${containerEnv:PATH}"
+  },
 
   // ★追加部分②：コンテナ作成直後に requirements.txt のライブラリをインストール
-  "postCreateCommand": "pip install -r requirements.txt",
+  "postCreateCommand": "python3 -m venv /workspace/.venv && /workspace/.venv/bin/python -m pip install --upgrade pip && /workspace/.venv/bin/python -m pip install -r /workspace/requirements.txt",
 
   // コンテナ起動後に毎回実行されるコマンドです。
   // ここでファイアウォール初期化スクリプトを動かし、外向き通信ルールを適用します。
