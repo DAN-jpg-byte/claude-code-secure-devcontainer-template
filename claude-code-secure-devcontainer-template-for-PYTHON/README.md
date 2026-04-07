@@ -1,4 +1,4 @@
-# 🐳 Claude Code × DevContainer セキュリティ設定
+# 🐳 Claude Code × DevContainer セキュリティ設定　
 
 ## このリポジトリは何？
 
