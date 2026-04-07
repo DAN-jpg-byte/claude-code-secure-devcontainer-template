@@ -12,6 +12,10 @@ FROM mcr.microsoft.com/devcontainers/javascript-node:20
 RUN apt-get update && apt-get install -y git curl ufw && \
     rm -rf /var/lib/apt/lists/*
 
+# postStartCommand は remoteUser=node で動くため、UFW だけパスワードなし sudo 可能にする（NOPASSWD: ALL は付けない）
+RUN echo 'node ALL=(root) NOPASSWD: /usr/sbin/ufw, /sbin/ufw' > /etc/sudoers.d/node-firewall && \
+    chmod 0440 /etc/sudoers.d/node-firewall
+
 # 3. メインの道具「Claude Code」をインストールします
 # 先ほど借りたNode.jsという土台を使って、
 # アンソロピック社の「Claude Code」という特別な道具を部屋の中に設置します。
