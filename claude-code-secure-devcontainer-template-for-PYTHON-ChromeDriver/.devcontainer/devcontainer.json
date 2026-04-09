@@ -1,0 +1,65 @@
+{
+  "name": "Claude Code Secure Sandbox",
+
+  "build": {
+    "dockerfile": "Dockerfile"
+  },
+
+  // ★追加部分①：Python環境をコンテナに自動で組み込む
+  "features": {
+    "ghcr.io/devcontainers/features/python:1": {
+      "installTools": true,
+      "version": "os-provided"  
+    }
+  },
+
+  // ワークスペースのマウント
+  "workspaceMount": "source=${localWorkspaceFolder},target=/workspace,type=bind,consistency=cached",
+  "workspaceFolder": "/workspace",
+
+  // ① .env を環境変数として注入（ファイル自体はコンテナ内に存在しない）
+  "runArgs": [
+    "--env-file", "C:/Users/user/Desktop/PROGRAM DEVELOPMENT/Claude_code/claude-code-secure-devcontainer-template-TEST-ENV/.env",
+    "--cap-add=NET_ADMIN"
+  ],
+
+  // ② Claude Code の認証情報を永続化
+  //    Windows側の C:\Users\user\.claude をコンテナ内にマウントする
+  "mounts": [
+    "source=C:/Users/user/.claude,target=/home/node/.claude,type=bind,consistency=cached"
+  ],
+
+  // ③ Claude Code に設定ディレクトリの場所を教える
+  "containerEnv": {
+    "CLAUDE_CONFIG_DIR": "/home/node/.claude"
+  },
+
+  // VS Code 拡張機能
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-python.python",
+        "ms-azuretools.vscode-docker",
+        "Anthropic.claude-code"        
+      ],
+      "settings": {
+        "python.defaultInterpreterPath": "/workspace/.venv/bin/python",
+        "python.terminal.activateEnvironment": true
+      }
+    }
+  },
+
+  // ユーザーは "node"（Dockerfile のベースイメージに合わせる）
+  "remoteUser": "node",
+  "remoteEnv": {
+    "VIRTUAL_ENV": "/workspace/.venv",
+    "PATH": "/workspace/.venv/bin:${containerEnv:PATH}"
+  },
+
+  // ★追加部分②：コンテナ作成直後に requirements.txt のライブラリをインストール
+  "postCreateCommand": "python3 -m venv /workspace/.venv && /workspace/.venv/bin/python -m pip install --upgrade pip && /workspace/.venv/bin/python -m pip install -r /workspace/requirements.txt",
+
+  // コンテナ起動後に毎回実行されるコマンドです。
+  // ここでファイアウォール初期化スクリプトを動かし、外向き通信ルールを適用します。
+  "postStartCommand": "bash .devcontainer/init-firewall.sh"
+}
