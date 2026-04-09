@@ -6,8 +6,10 @@
 
 ## 最初に読む（コピー運用向け）
 
-テンプレを複製して使う場合は、まず `TEMPLATE_SETUP_GUIDE.md` を読んでください。  
+テンプレを複製して使う場合は、まず [`開発メモ/TEMPLATE_SETUP_GUIDE.md`](開発メモ/TEMPLATE_SETUP_GUIDE.md) を読んでください。  
 `.venv` をコピーしない運用と、`requirements.txt` の更新手順を短く整理しています。
+
+設計・引き継ぎ・履歴系の Markdown は **`開発メモ/`** にまとめてあります。一覧は [`開発メモ/README.md`](開発メモ/README.md) を参照してください。
 
 ## 目的
 
@@ -20,7 +22,7 @@
 
 ## Selenium + noVNC（最短手順）
 
-初めての人向けの最小フローです。詳細・トラブル表は [`HANDOFF.md`](HANDOFF.md) を参照してください。
+初めての人向けの最小フローです。詳細・トラブル表は [`開発メモ/HANDOFF.md`](開発メモ/HANDOFF.md) を参照してください。
 
 1. **Rebuild Container** またはコンテナを一度閉じて **Reopen in Container** する（`postCreate` / `postStart` が走る）。
 2. ホストのブラウザで **`http://127.0.0.1:6080/vnc.html`** を開く（必要なら「接続」。自動接続例: `?autoconnect=true&resize=scale`）。
@@ -80,13 +82,12 @@ HTTPS で企業プロキシ等により証明書エラーになる場合は、**
 ├── post-start.sh          # postStart: UFW のあと noVNC 起動＋検証ログ追記
 ├── start-novnc.sh         # Xvfb / x11vnc / websockify（6080）
 
-HANDOFF.md                 # 作業引き継ぎ・トラブル対応表（詳細）
+開発メモ/                  # 要件・計画・HANDOFF・履歴など（README 以外のドキュメント）
 CLAUDE.md                  # Claude Code への共通ルール
 requirements.txt           # Python 依存ライブラリ（selenium 含む）
 selenium_chrome_check.py   # Chromium + Selenium のスモークテスト（noVNC 表示可）
 env_check.py               # 必須環境変数チェックサンプル
 requests_sample.py         # requests 動作確認サンプル
-devcontainer-retrospective.md  # トラブルと対策の記録
 ```
 
 ## 現在の実装内容
@@ -261,7 +262,7 @@ ss -ltnp | grep -E '5900|6080'
 - **UFW** … **外向きは必要最小限**（いまは DNS・HTTP・HTTPS など）。業務で別ポートが要るなら**足しすぎない**。  
 - **`.env`** … **リポジトリに含めない**。**ワークスペース外**に置き、`runArgs` の **`--env-file`** だけで注入する。  
 
-詳細はこの README の「セキュリティの最終確認（Step 5）」と **`REQUIREMENTS.md`** も参照してください。
+詳細はこの README の「セキュリティの最終確認（Step 5）」と [**`開発メモ/REQUIREMENTS.md`**](開発メモ/REQUIREMENTS.md) も参照してください。
 
 ### 困ったときの見どころ（チェックリスト）
 
@@ -272,16 +273,17 @@ ss -ltnp | grep -E '5900|6080'
 | Selenium だけ外部に繋がらない | **UFW** で 80/443 が許可されているか（`init-firewall.sh`）。タイムアウトなら `selenium_chrome_check.py` のリトライや `page_load_strategy` の説明。 |
 | 証明書エラーだらけ | プロキシの TLS 検査が疑わしい。**CA 追加**か、検証専用の **`SELENIUM_INSECURE_TLS`** の扱いを読む。 |
 
-より表形式の対処は **`HANDOFF.md`** にまとまっています。
+より表形式の対処は [**`開発メモ/HANDOFF.md`**](開発メモ/HANDOFF.md) にまとまっています。
 
 ### 要件・計画ドキュメントへの道しるべ
 
 | 読みたい内容 | ファイル |
 |--------------|-----------|
-| 何を必須とみなすか、受け入れ条件 | **`REQUIREMENTS.md`** |
-| Step 0〜6 の段階的な計画 | **`STEP_BY_STEP_PLAN.md`** |
-| ファイル別の変更内容・ハマりどころ表 | **`HANDOFF.md`** |
-| テンプレを複製したときの手順 | **`TEMPLATE_SETUP_GUIDE.md`** |
+| 何を必須とみなすか、受け入れ条件 | **[`開発メモ/REQUIREMENTS.md`](開発メモ/REQUIREMENTS.md)** |
+| Step 0〜6 の段階的な計画 | **[`開発メモ/STEP_BY_STEP_PLAN.md`](開発メモ/STEP_BY_STEP_PLAN.md)** |
+| ファイル別の変更内容・ハマりどころ表 | **[`開発メモ/HANDOFF.md`](開発メモ/HANDOFF.md)** |
+| テンプレを複製したときの手順 | **[`開発メモ/TEMPLATE_SETUP_GUIDE.md`](開発メモ/TEMPLATE_SETUP_GUIDE.md)** |
+| メモ一式の索引 | **[`開発メモ/README.md`](開発メモ/README.md)** |
 
 ---
 
@@ -289,6 +291,7 @@ ss -ltnp | grep -E '5900|6080'
 
 ## 補足ドキュメント
 
-- Selenium / noVNC / UFW の引き継ぎとトラブル表: [`HANDOFF.md`](HANDOFF.md)
-- 詳細な経緯とハマりどころ: `devcontainer-retrospective.md`
-- 会話ベースの引き継ぎ要約: `conversation-summary.md`
+- **開発メモ一式の入口**: [`開発メモ/README.md`](開発メモ/README.md)
+- Selenium / noVNC / UFW の引き継ぎとトラブル表: [`開発メモ/HANDOFF.md`](開発メモ/HANDOFF.md)
+- 詳細な経緯とハマりどころ: [`開発メモ/devcontainer-retrospective.md`](開発メモ/devcontainer-retrospective.md)
+- 会話ベースの引き継ぎ要約: [`開発メモ/conversation-summary.md`](開発メモ/conversation-summary.md)

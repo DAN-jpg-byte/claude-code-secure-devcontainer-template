@@ -6,7 +6,7 @@
 - **noVNC 認証**: 初期は **なし**（**localhost 限定**を前提）
 - **UFW**: まず **DNS 53 / HTTPS 443 / HTTP 80**、noVNC 用 **受信 6080**、**ループバック lo の in/out 明示許可**
 
-参照ドキュメント: `REQUIREMENTS.md`, `STEP_BY_STEP_PLAN.md`, `README.md`
+参照ドキュメント: 同フォルダの `REQUIREMENTS.md`, `STEP_BY_STEP_PLAN.md`、リポジトリ直下の [`README.md`](../README.md)
 
 ---
 
@@ -97,7 +97,7 @@ SELENIUM_HEADLESS=1 python /workspace/selenium_chrome_check.py
 
 - **Step 4**: `postStart`（`post-start.sh`）で noVNC が毎回立つか、`ss` / `poststart-verify.log` / Dev Containers ログで確認（手動起動で回避していた場合は要確認）
 - **Step 5**: セキュリティ最終確認（6080 の公開範囲、UFW、`.env` 運用）
-- **Step 6**: `README.md` に「noVNC + Selenium」の最小手順を追記（ユーザー依頼があれば）
+- **Step 6**: リポジトリ直下の [`README.md`](../README.md) に「noVNC + Selenium」の最小手順を追記（ユーザー依頼があれば）
 
 ---
 

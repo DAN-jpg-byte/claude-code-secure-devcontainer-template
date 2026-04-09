@@ -44,9 +44,10 @@
 
 テンプレから新規案件を作るとき、次は不要なら削除してOKです。
 
-- `conversation-summary.md`（会話の引き継ぎメモ）
-- `devcontainer-retrospective.md`（検証/振り返りメモ）
-- `README.md`（テンプレ説明。案件用 README に差し替えるなら削除）
+- `開発メモ/conversation-summary.md`（会話の引き継ぎメモ）
+- `開発メモ/devcontainer-retrospective.md`（検証/振り返りメモ）
+- `開発メモ/` フォルダごと不要なら削除（設計・履歴メモ一式）
+- リポジトリ直下の `README.md`（テンプレ説明。案件用 README に差し替えるなら削除）
 - `requests_sample.py`（通信テストサンプル）
 - `env_check.py`（環境変数チェックサンプル）
 
