@@ -29,7 +29,9 @@ resolve_websockify() {
 # Xvfb :99（ソケットが無ければ起動）
 if [[ ! -S /tmp/.X11-unix/X99 ]]; then
   # -ac: ホストベース認可を無効（コンテナ内ローカル用途）
-  Xvfb :99 -screen 0 1920x1080x24 -ac +extension RANDR >>"${LOGDIR}/xvfb.log" 2>&1 &
+  # postStart 終了時の SIGHUP / 制御端末切り離し: setsid + nohup + stdin 閉じる
+  setsid nohup Xvfb :99 -screen 0 1920x1080x24 -ac +extension RANDR </dev/null >>"${LOGDIR}/xvfb.log" 2>&1 &
+  disown || true
   for _ in $(seq 1 100); do
     [[ -S /tmp/.X11-unix/X99 ]] && break
     sleep 0.05
@@ -41,8 +43,10 @@ if [[ ! -S /tmp/.X11-unix/X99 ]]; then
 fi
 
 # VNC はループバックのみ（5900 はホストに公開しない想定）。認証は当面なし（要件 Step 0）
+# postStart のシェル終了時に SIGHUP で子が死なないよう setsid + nohup（制御端末なし）
 if ! ss -ltn 2>/dev/null | grep -qE ':5900\b'; then
-  x11vnc -display :99 -forever -shared -rfbport 5900 -localhost -nopw -bg -o "${LOGDIR}/x11vnc.log"
+  setsid nohup x11vnc -display :99 -forever -shared -rfbport 5900 -localhost -nopw -o "${LOGDIR}/x11vnc.log" </dev/null >>"${LOGDIR}/x11vnc.stdout.log" 2>&1 &
+  disown || true
 fi
 for _ in $(seq 1 40); do
   ss -ltn 2>/dev/null | grep -qE ':5900\b' && break

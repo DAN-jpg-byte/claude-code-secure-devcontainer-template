@@ -42,6 +42,8 @@ ss -ltn | grep -E '6080|5900'
 `5900` と `6080` が **LISTEN** していれば、Xvfb→VNC→websockify まで到達しています。  
 追加で、postStart 実行時刻付きの抜粋が **`~/.cache/novnc-logs/poststart-verify.log`** に追記されます。
 
+**6080 だけ LISTEN して 5900 が無い**場合は、postStart のシェル終了時に **x11vnc だけ落ち**、**websockify（nohup）だけ残る**ことがあります。`start-novnc.sh` では Xvfb / x11vnc を **`setsid` + `nohup`** で制御端末から切り離して起動しています。**Rebuild** するか、下の手動復旧で `start-novnc.sh` を再実行してください。
+
 **ダメなとき**: Dev Containers のログで `postStart` が **`post-start.sh`** / **`start-novnc.sh`** で失敗していないか確認してください。手動復旧:
 
 ```bash
