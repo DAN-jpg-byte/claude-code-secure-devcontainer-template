@@ -1,7 +1,8 @@
 # Claude Code Secure DevContainer Template for Python
 
 このテンプレートは、Claude Code を **Python 開発向け DevContainer 内で安全に運用**するための最小構成です。  
-実ファイル（`.devcontainer/*`、`requirements.txt`、`env_check.py`、`requests_sample.py`）に合わせて説明しています。
+実ファイル（`.devcontainer/*`、`requirements.txt`、`env_check.py`、`requests_sample.py`）に合わせて説明しています。  
+**後から全体像だけ追いかけたい**ときは、下の **「このテンプレでできること・全体の振り返り（後から読む用）」** を読んでください。
 
 ## 最初に読む（コピー運用向け）
 
@@ -178,6 +179,113 @@ python /workspace/env_check.py
 - **`.env` の場所変更**: `devcontainer.json` の `runArgs` を更新
 - **ユーザー変更**: `remoteUser` を変える場合は `.claude` マウント先と `CLAUDE_CONFIG_DIR` を合わせて変更
 - **依存追加**: `requirements.txt` に追記後、Rebuild かコンテナ内で再インストール
+
+## このテンプレでできること・全体の振り返り（後から読む用）
+
+数ヶ月後に README だけ開いても、「このリポジトリは何の箱か」「どう動いていたか」「困ったとき何を見るか」が追いやすいように、いまの構成をやさしい言葉でまとめた節です。上の「Selenium + noVNC（最短手順）」と重なる部分もありますが、こちらは**意味と経緯**を取りに来たとき向けです。
+
+### 一言でいうと何ができるか
+
+**自分の Windows の上で動いている VS Code / Cursor から、Docker の中の Linux（Dev Container）に入り、その中で Python を動かせます。** さらにその箱の中では、
+
+- **Chromium（Chrome に近いブラウザ）** を **Selenium** で自動的に開いたり、ページを読んだり、画面の画像を保存したりできる  
+- コンテナの中には物理モニターがないので **仮想ディスプレイ（Xvfb）** の上に画面を描画し、**noVNC** 経由で **自分の PC のブラウザ**（`http://127.0.0.1:6080/vnc.html`）から、その様子を**動画に近い形で見られる**  
+- 外のネットワークへの出方は **UFW（ファイアウォール）** で「許可した種類の通信だけ」に寄せている  
+- パスワードや API キーは **`.env` ファイルをプロジェクトフォルダに置かず**、**別の場所のファイル**から **`--env-file`** で環境変数としてだけ流し込む、という運用を前提にしている  
+
+という状態を目指したテンプレです。**「Web を自動操作して検証する」「画面付きで挙動を目視したい」「秘密情報をリポジトリに混ぜたくない」** の出発点として使えます。
+
+### 部品の名前と役割（対応表）
+
+名前が多いので、**何をしている部品か**だけ短く対応させます。
+
+| 名前 | ざっくりした役割 |
+|------|------------------|
+| **Dev Container** | エディタが開く「コンテナの中の開発部屋」。ホストのファイルを `/workspace` にマウントして編集する。 |
+| **Dockerfile** | その部屋の「最初から入っているソフト」のレシピ。Node・Python 用土台・Chromium・noVNC 用ツール・UFW など。 |
+| **`devcontainer.json`** | 部屋の使い方の設定。ポート転送、環境変数、コンテナ起動後に走らせるコマンドなど。 |
+| **`.venv`** | Python 用の仮想環境。`requirements.txt` をここに `pip install` する想定で、`remoteEnv` で優先される。 |
+| **Chromium + chromedriver** | ブラウザ本体と、プログラムから操作するためのドライバ。同じディストリの **apt** で揃え、バージョンの食い違いを減らす方針。 |
+| **Xvfb** | モニターがない環境で「仮想の画面（ディスプレイ `:99`）」を作る。 |
+| **x11vnc** | その仮想画面を VNC で出す。既定では **5900** 番ポートで待ち受け、**コンテナ内の localhost 向け**に寄せている。 |
+| **websockify（noVNC 用）** | VNC を Web 用プロトコルに載せ替え、**6080** で待ち受ける。ホスト側はエディタの **ポート転送** で `localhost` から触る。 |
+| **UFW** | 「外へ出す通信は基本ダメ。書いたルールだけ通す」方式のファイアウォール。`init-firewall.sh` でルールを入れる。 |
+| **`post-start.sh`** | コンテナが**起動するたび**に走る `postStart` 用の入口。中でファイアウォールのあと **noVNC 一式を起動**し、ログに listen 状況を残す。 |
+
+### コンテナを開いたあと、裏で何が起きるか（順序）
+
+初めての人が「なぜ Rebuild したら一通り動くのか」を追いやすいように、**だいたいの順番**だけ書きます。
+
+1. **Rebuild** や **Reopen in Container** でコンテナが立ち上がる。  
+2. **`postCreateCommand`**（初回に近いタイミング）で、`.venv` の作成と `pip install -r requirements.txt` が走る。Python と Selenium などがここで入る。  
+3. **`postStartCommand`** で **`bash .devcontainer/post-start.sh`** が実行される。  
+4. **`post-start.sh`** の中で、まず **`init-firewall.sh`** が UFW のルールを入れる（DNS・HTTP・HTTPS の外向き、6080 の受信、ループバックの許可など）。  
+5. 続けて **`start-novnc.sh`** が **Xvfb → x11vnc → websockify** の順で（必要なら）起動する。  
+6. 成功すると、Dev Containers のログに **`[devcontainer post-start] 完了`** のような行が出る。また **`~/.cache/novnc-logs/poststart-verify.log`** に、そのときの **5900 / 6080** の listen 抜粋が追記される。  
+
+ここまでが「毎回自動」。**手で `start-novnc.sh` を叩かなくても**、設定どおりなら起動直後から noVNC の準備が整う想定です。
+
+### なぜ `setsid` と `nohup` を使っているか（経緯のメモ）
+
+過去の挙動として、**postStart を実行したシェルが終わるタイミングで、プロセスに SIGHUP（いわゆる「親が終わるよ」信号）が飛ぶ**ことがありました。その結果、
+
+- **websockify** はもともと **`nohup`** で起動していて生き残る → **6080 だけ LISTEN のまま**  
+- **x11vnc** 側だけ落ちる → **5900 が消える**  
+
+という「半分だけ残る」状態になり得ました。いまの **`start-novnc.sh`** では **Xvfb** と **x11vnc** も **`setsid` + `nohup`** で**制御端末から切り離して**起動し、postStart の親シェルが終わっても **5900 と 6080 が揃ったまま**残りやすくしてあります。
+
+確認はコンテナ内で次のどちらかで十分です。
+
+```bash
+ss -ltnp | grep -E '5900|6080'
+```
+
+### Selenium の「画面に出す／出さない」
+
+- **noVNC で Chromium のウィンドウを見たい**  
+  - コンテナに **`DISPLAY=:99`** が付いている状態（このテンプレの既定）で、**`SELENIUM_HEADLESS=1` を付けない**。  
+  - 代表例: `python /workspace/selenium_chrome_check.py`（スクリーンショットは `/workspace/selenium_check.png`）。  
+
+- **ヘッドレスで軽く動かしたい（noVNC には映らない）**  
+  - **`SELENIUM_HEADLESS=1`** を付ける。  
+
+- **開く URL や証明書まわり**  
+  - URL は **`SELENIUM_TEST_URL`** で変えられる。  
+  - 企業プロキシなどで HTTPS が壊れて見える場合は、**正攻法は企業のルート CA をコンテナに入れる**こと。検証専用としてだけ **`SELENIUM_INSECURE_TLS=1`** を使う、という整理（本番の検証対象では使わない）。  
+
+細かい環境変数の一覧は **`selenium_chrome_check.py`** 先頭のドキュメント文字列にあります。
+
+### セキュリティで押さえておきたいこと（短く）
+
+- **6080** … **インターネット全体にポートを開けない**。**エディタのポート転送**で **localhost から**使う想定。  
+- **UFW** … **外向きは必要最小限**（いまは DNS・HTTP・HTTPS など）。業務で別ポートが要るなら**足しすぎない**。  
+- **`.env`** … **リポジトリに含めない**。**ワークスペース外**に置き、`runArgs` の **`--env-file`** だけで注入する。  
+
+詳細はこの README の「セキュリティの最終確認（Step 5）」と **`REQUIREMENTS.md`** も参照してください。
+
+### 困ったときの見どころ（チェックリスト）
+
+| 気になること | まず見る場所 |
+|--------------|----------------|
+| 起動直後から noVNC に繋がらない | Dev Containers の**出力ログ**で `postStart` が **`[devcontainer post-start] 完了`** まで行っているか。`~/.cache/novnc-logs/` の各 `.log`。 |
+| **6080 だけ**あって **5900 が無い** | 古い挙動や途中失敗の可能性。最新の `start-novnc.sh` で **Rebuild** 済みか。手動なら `bash /workspace/.devcontainer/start-novnc.sh`。 |
+| Selenium だけ外部に繋がらない | **UFW** で 80/443 が許可されているか（`init-firewall.sh`）。タイムアウトなら `selenium_chrome_check.py` のリトライや `page_load_strategy` の説明。 |
+| 証明書エラーだらけ | プロキシの TLS 検査が疑わしい。**CA 追加**か、検証専用の **`SELENIUM_INSECURE_TLS`** の扱いを読む。 |
+
+より表形式の対処は **`HANDOFF.md`** にまとまっています。
+
+### 要件・計画ドキュメントへの道しるべ
+
+| 読みたい内容 | ファイル |
+|--------------|-----------|
+| 何を必須とみなすか、受け入れ条件 | **`REQUIREMENTS.md`** |
+| Step 0〜6 の段階的な計画 | **`STEP_BY_STEP_PLAN.md`** |
+| ファイル別の変更内容・ハマりどころ表 | **`HANDOFF.md`** |
+| テンプレを複製したときの手順 | **`TEMPLATE_SETUP_GUIDE.md`** |
+
+---
+
+この節は「忘れ防止用の地図」です。**手順だけ素早くやりたい**ときは、上の **「Selenium + noVNC（最短手順）」** に戻るとよいです。
 
 ## 補足ドキュメント
 
