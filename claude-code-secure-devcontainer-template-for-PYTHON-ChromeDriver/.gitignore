@@ -18,9 +18,9 @@ captcha.jpg
 error.png
 
 # IDE設定ファイル
-.vscode/
+# .vscode/
 .idea/
-
+.venv/
 
 # OS生成ファイル
 .DS_Store

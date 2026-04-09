@@ -18,7 +18,7 @@ captcha.jpg
 error.png
 
 # IDE設定ファイル
-.vscode/
+# .vscode/
 .idea/
 
 # OS生成ファイル
