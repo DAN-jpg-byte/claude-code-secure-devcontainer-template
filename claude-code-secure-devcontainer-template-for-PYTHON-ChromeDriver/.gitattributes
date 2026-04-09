@@ -1,0 +1,2 @@
+# Linux コンテナ / bash では CRLF だと set -o pipefail 等が壊れるため
+*.sh text eol=lf

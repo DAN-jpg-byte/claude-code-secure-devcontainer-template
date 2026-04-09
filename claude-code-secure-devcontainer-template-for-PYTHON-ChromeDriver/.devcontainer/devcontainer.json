@@ -31,7 +31,8 @@
 
   // ③ Claude Code に設定ディレクトリの場所を教える
   "containerEnv": {
-    "CLAUDE_CONFIG_DIR": "/home/node/.claude"
+    "CLAUDE_CONFIG_DIR": "/home/node/.claude",
+    "DISPLAY": ":99"
   },
 
   // VS Code 拡張機能
@@ -51,9 +52,17 @@
 
   // ユーザーは "node"（Dockerfile のベースイメージに合わせる）
   "remoteUser": "node",
+  "forwardPorts": [6080],
+  "portsAttributes": {
+    "6080": {
+      "label": "noVNC",
+      "onAutoForward": "notify"
+    }
+  },
   "remoteEnv": {
     "VIRTUAL_ENV": "/workspace/.venv",
-    "PATH": "/workspace/.venv/bin:${containerEnv:PATH}"
+    "PATH": "/workspace/.venv/bin:${containerEnv:PATH}",
+    "DISPLAY": ":99"
   },
 
   // ★追加部分②：コンテナ作成直後に requirements.txt のライブラリをインストール
@@ -61,5 +70,5 @@
 
   // コンテナ起動後に毎回実行されるコマンドです。
   // ここでファイアウォール初期化スクリプトを動かし、外向き通信ルールを適用します。
-  "postStartCommand": "bash .devcontainer/init-firewall.sh"
+  "postStartCommand": "bash .devcontainer/post-start.sh"
 }

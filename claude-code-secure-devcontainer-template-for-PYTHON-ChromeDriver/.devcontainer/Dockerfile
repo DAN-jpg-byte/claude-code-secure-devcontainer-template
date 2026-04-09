@@ -25,6 +25,15 @@ RUN apt-get update && apt-get install -y \
     && if [ -x /usr/bin/chromium-browser ] && [ ! -e /usr/bin/chromium ]; then ln -s /usr/bin/chromium-browser /usr/bin/chromium; fi \
     && rm -rf /var/lib/apt/lists/*
 
+# 仮想ディスプレイ + VNC + noVNC（Step 3）。Chromium のウィンドウをホストブラウザから閲覧するための土台
+RUN apt-get update && apt-get install -y \
+    iproute2 \
+    novnc \
+    websockify \
+    x11vnc \
+    xvfb \
+    && rm -rf /var/lib/apt/lists/*
+
 # postStartCommand は remoteUser=node で動くため、UFW だけパスワードなし sudo 可能にする（NOPASSWD: ALL は付けない）
 RUN echo 'node ALL=(root) NOPASSWD: /usr/sbin/ufw, /sbin/ufw' > /etc/sudoers.d/node-firewall && \
     chmod 0440 /etc/sudoers.d/node-firewall
