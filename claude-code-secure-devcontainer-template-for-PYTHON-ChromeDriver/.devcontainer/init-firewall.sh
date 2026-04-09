@@ -18,6 +18,9 @@ sudo -n ufw allow out to any port 53
 # 4. HTTPS を許可 — 多くの Web/API が使う暗号化通信の標準（ポート 443）
 sudo -n ufw allow out to any port 443
 
+# 4b. HTTP を許可（ポート 80）— リダイレクト先やスモークテスト用。Selenium で http:// を開く場合に必要
+sudo -n ufw allow out to any port 80
+
 # 5. 上記のルールを有効化
 #    --force は「本当に有効にしますか？」の対話確認を省略するためのオプションです。
 sudo -n ufw --force enable

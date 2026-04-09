@@ -13,11 +13,16 @@ RUN apt-get update && apt-get install -y git curl ufw && \
     rm -rf /var/lib/apt/lists/*
 
 # Chromium + chromedriver（同一ディストリの apt 版でバージョン整合。再現性はベースイメージ＋apt スナップショットに依存）
+# --no-install-recommends は Chromium の推奨（CA/NSS 周りなど）が抜けて HTTPS が証明書エラーになることがあるため使わない
 # noVNC 前の Step 2 ではヘッドレス起動で十分。追加の共有メモリ対策は Selenium 側の引数で行う
-RUN apt-get update && apt-get install -y --no-install-recommends \
+RUN apt-get update && apt-get install -y \
+    ca-certificates \
     chromium \
     chromium-driver \
     fonts-liberation \
+    && update-ca-certificates \
+    && if [ -x /usr/lib/chromium/chromedriver ] && [ ! -e /usr/bin/chromedriver ]; then ln -s /usr/lib/chromium/chromedriver /usr/bin/chromedriver; fi \
+    && if [ -x /usr/bin/chromium-browser ] && [ ! -e /usr/bin/chromium ]; then ln -s /usr/bin/chromium-browser /usr/bin/chromium; fi \
     && rm -rf /var/lib/apt/lists/*
 
 # postStartCommand は remoteUser=node で動くため、UFW だけパスワードなし sudo 可能にする（NOPASSWD: ALL は付けない）
